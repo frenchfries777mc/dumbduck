@@ -1,4 +1,4 @@
-(function(){
+DD.ready(function(){
 const $=DD.$,esc=DD.esc;
 const app=document.getElementById('app');
 let cur=null,tab='char',creating=false,busy=false;
@@ -167,4 +167,4 @@ function pNum(el){
 }
 function tabMarks(){DD.$$('.tab').forEach(b=>{const k=b.dataset.k,has=cur.ab[k]&&cur.ab[k].model;let s=b.querySelector('.ok');if(has&&!s){b.insertAdjacentHTML('beforeend','<span class="ok">✓</span>');}});}
 render();
-})();
+});

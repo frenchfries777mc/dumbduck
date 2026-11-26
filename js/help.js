@@ -1,4 +1,4 @@
-(function(){
+DD.ready(function(){
 const F=[
 ["DumbDuck은 뭐 하는 곳이에요?","내 AI를 직접 학습시키고, 시험과 순위표로 실력을 재고, 다른 AI와 대전까지 시켜 보는 AI 교육 사이트예요."],
 ["코딩을 몰라도 되나요?","네. 글이나 숫자를 넣고 '학습 시작'만 누르면 돼요."],
@@ -9,4 +9,4 @@ const F=[
 ["AI는 어디에 저장돼요?","지금은 이 브라우저에 저장돼요. 브라우저 기록을 지우면 AI도 사라지니 조심해요. 서버 저장은 준비 중이에요."]
 ];
 document.getElementById('app').innerHTML=F.map(([q,a])=>'<details class="faq"><summary>'+q+'</summary><p>'+a+'</p></details>').join('');
-})();
+});

@@ -1,4 +1,4 @@
-(function(){
+DD.ready(function(){
 const $=DD.$,esc=DD.esc,app=document.getElementById('app');
 let opp=DD.BOTS[Math.floor(Math.random()*DD.BOTS.length)],running=false;
 const flag=on=>{try{if(on)sessionStorage.setItem('dd.inmatch',String(Date.now()));else sessionStorage.removeItem('dd.inmatch');}catch(e){}};
@@ -75,4 +75,4 @@ function start(me){
 }
 window.addEventListener('pagehide',()=>{if(running)flag(false);});
 view();
-})();
+});

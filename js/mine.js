@@ -1,4 +1,4 @@
-(function(){
+DD.ready(function(){
 const $=DD.$,esc=DD.esc,app=document.getElementById('app');
 function inMatch(){try{return Date.now()-(+sessionStorage.getItem('dd.inmatch')||0)<90000;}catch(e){return false;}}
 
@@ -50,4 +50,4 @@ function detail(id){
 function route(){const id=location.hash.slice(1);if(id)detail(id);else list();}
 window.addEventListener('hashchange',route);
 route();
-})();
+});

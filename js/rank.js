@@ -1,4 +1,4 @@
-(function(){
+DD.ready(function(){
 const esc=DD.esc,app=document.getElementById('app');
 let key='all';
 function render(){
@@ -11,4 +11,4 @@ function render(){
   DD.$$('.tab').forEach(b=>b.onclick=()=>{key=b.dataset.k;render();});
 }
 render();
-})();
+});
