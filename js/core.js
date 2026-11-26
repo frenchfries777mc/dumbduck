@@ -81,8 +81,7 @@ DD.botScores=function(){
 };
 /* 순위표 줄 만들기: 내 AI + 기본 AI */
 DD.board=function(key){
-  const bs=DD.botScores(),rows=[];
-  DD.BOTS.forEach(b=>{const sc=bs[b.id];const score=key==='all'?Math.round(DD.ABILITIES.reduce((s,a)=>s+sc[a.key],0)*10):sc[key];rows.push({name:b.name,profile:b.profile,score,bot:true});});
+  const rows=[];
   DD.state.ais.forEach(ai=>{
     const score=key==='all'?DD.totalScore(ai):(ai.ab[key]&&ai.ab[key].score);
     if(score==null||(key==='all'&&!score))return;
