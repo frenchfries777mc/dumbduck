@@ -88,8 +88,19 @@ ML.nbPredict=function(m,text){
   return names.map((n,i)=>[n,ex[i]/sum]).sort((a,b)=>b[1]-a[1]);
 };
 ML.nbEval=function(m,tests){
-  let ok=0;
-  for(const [s,lab] of tests){const p=ML.nbPredict(m,s);if(p.length&&p[0][0]===lab)ok++;}
+  // 분류 이름이 시험의 이름(긍정·부정)과 같으면 그대로 맞춰 보고, 이름을 마음대로 붙였으면 "같은 종류끼리 잘 묶었는지"로 채점해요
+  const labs=[...new Set(tests.map(t=>t[1]))],names=Object.keys(m.cls);
+  const named=labs.every(l=>names.indexOf(l)>=0);
+  const cnt={};let ok=0;
+  for(const [s,lab] of tests){const p=ML.nbPredict(m,s);const g=p.length?p[0][0]:null;
+    if(g===null)continue;(cnt[g]||(cnt[g]={}))[lab]=((cnt[g]||{})[lab]||0)+1;if(named&&g===lab)ok++;}
+  if(!named){
+    // 시험 종류마다 서로 다른 분류 하나씩 짝지어 가장 많이 맞는 경우를 골라요
+    const best=(i,used)=>{if(i===labs.length)return 0;let b=0;
+      for(const c of names){if(used.has(c))continue;used.add(c);b=Math.max(b,((cnt[c]||{})[labs[i]]||0)+best(i+1,used));used.delete(c);}
+      return b;};
+    ok=names.length>=labs.length?best(0,new Set()):0;
+  }
   return {ok,tot:tests.length,acc:tests.length?ok/tests.length:0};
 };
 

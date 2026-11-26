@@ -1,6 +1,9 @@
 DD.ready(function(){
 const esc=DD.esc,app=document.getElementById('app');
 const arrow='<svg viewBox="0 0 45 34" aria-hidden="true"><path d="M0 11h24V0l21 17-21 17V23H0z"/></svg>';
+const hero=document.createElement('div');hero.className='hero';
+hero.innerHTML='<h2>AI 시대,<br>AI 경쟁</h2><a class="go" href="learn.html">AI 학습시키기</a>';
+app.parentNode.insertBefore(hero,app);
 const top=DD.board('all').slice(0,10);
 app.innerHTML='<div class="rows"><a class="rowlink" href="mine.html">내 AI'+arrow+'</a><a class="rowlink" href="battle.html">AI 대전 결과'+arrow+'</a></div>'
  +'<h2 class="ranktitle">오늘의 순위:</h2>'
