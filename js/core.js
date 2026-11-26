@@ -258,7 +258,7 @@ DD.auth={
 DD.ABILITIES=[
  {key:'char',name:'글자 맞히기',battle:true,desc:'문장의 다음 글자를 맞혀요'},
  {key:'sent',name:'문장 분류',battle:true,desc:'문장이 긍정인지 부정인지 가려내요'},
- {key:'ttt',name:'틱택토',battle:true,desc:'혼자 수천 판을 두며 이기는 법을 익혀요'},
+ {key:'ttt',name:'틱택토',battle:true,desc:'나와 한 판씩 두며 이기는 법을 익혀요'},
  {key:'num',name:'숫자 패턴',battle:false,desc:'숫자 줄의 다음 숫자를 맞혀요'}
 ];
 DD.ability=k=>DD.ABILITIES.find(a=>a.key===k);
