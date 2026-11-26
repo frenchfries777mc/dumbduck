@@ -169,6 +169,18 @@ ML.tttEval=function(m,n){
   return {win,draw,lose,tot:n,acc:(win+0.5*draw)/n};
 };
 ML.tttEmpty=randomModel;
+ML.tttKey=key;
+ML.tttMove=function(m,b,me,eps){return pickBest((m&&m.V)||{},b,me,eps||0,Math.random);};
+// 사람과 둔 한 판에서 배워요: 이긴 쪽 수는 올리고 진 쪽 수는 내려요 (사람의 좋은 수도 따라 배워요)
+ML.tttLearn=function(prev,hist,w){
+  const V=Object.assign({},(prev&&prev.V)||{});
+  for(const q of [1,2]){
+    const target=w===0?0:(w===q?1:-1);
+    for(const k of hist[q])V[k]=(V[k]||0)+0.35*(target-(V[k]||0));
+  }
+  const out={};for(const k in V){const r=Math.round(V[k]*100)/100;if(r)out[k]=r;}
+  return {V:out,games:((prev&&prev.games)||0)+1};
+};
 
 /* ---------- 숫자 패턴: 규칙 선택표 ---------- */
 const RULES=[

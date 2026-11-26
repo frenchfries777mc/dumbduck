@@ -100,49 +100,54 @@ function pSent(el){
 /* ----- 틱택토 ----- */
 function pTTT(el){
   const ab=ensure('ttt');
-  el.innerHTML='<p class="note">AI가 혼자서 틱택토를 수천 판 두면서 어떤 수가 이기는 수인지 익혀요.</p>'
-   +'<div class="row" style="margin:14px 0"><div><label class="f" for="gm">이번에 둘 판 수</label><select id="gm"><option>200</option><option selected>1000</option><option>3000</option><option>5000</option></select></div>'
-   +'<button class="btn" id="go" style="align-self:end">학습 시작</button><button class="btn ghost" id="rs" style="align-self:end">처음부터 다시</button></div>'
-   +'<div class="bar" style="margin-bottom:10px"><i id="pg" style="width:0"></i></div><div id="res">'+trainedLine('ttt')+'</div>'
-   +'<h3 style="margin-top:18px">해보기: 내 AI와 한 판 (나는 ●, AI는 ○)</h3><div id="pl"></div>';
-  const run=(fresh)=>{
-    if(busy)return;busy=true;DD.$$('button',el).forEach(b=>b.disabled=true);
-    const total=+$('#gm',el).value;let done=0,m=fresh?null:(ab.model||null);const chunk=250;
-    const step=()=>{
-      const n=Math.min(chunk,total-done);m=ML.tttTrain(n,m);done+=n;$('#pg',el).style.width=Math.round(done/total*100)+'%';
-      if(done<total){setTimeout(step,0);return;}
-      ab.model=m;const r=ML.tttEval(m,100);ab.info='지금까지 '+DD.fmt(m.games)+'판 둠 · 무작위 상대 승률 '+pct(r.win/r.tot)+'%';DD.save();
-      busy=false;DD.$$('button',el).forEach(b=>b.disabled=false);$('#res',el).innerHTML=trainedLine('ttt');tabMarks();play();
-    };
-    step();
+  el.innerHTML='<p class="note">AI와 직접 한 판씩 두어요. 판이 끝날 때마다 AI가 그 판에서 이기고 지는 법을 배워요. 처음엔 아무 데나 두지만, 많이 둘수록 똑똑해져요.</p>'
+   +'<div id="stat" style="margin:12px 0"></div><div id="pl"></div>'
+   +'<div class="row" style="margin-top:14px"><button class="btn ghost sm" id="rs">처음부터 다시</button></div>';
+  const stat=()=>{const g=ab.model?ab.model.games:0;$('#stat',el).innerHTML='<b>'+DD.fmt(g)+'판</b> 배웠어요'+(ab.info?' · '+esc(ab.info):'');};
+  let b,over,me,ai,hist,turn;
+  const start=()=>{
+    const g=ab.model?ab.model.games:0;
+    me=g%2===0?1:2;ai=3-me;                       // 한 판씩 번갈아 먼저 둬요
+    b=Array(9).fill(0);over=false;hist={1:[],2:[]};turn=1;
+    stat();
+    if(ai===1){aiMove();}else draw('내가 먼저 두세요 (●)');
   };
-  $('#go',el).onclick=()=>run(false);$('#rs',el).onclick=()=>run(true);
-  /* 대결 */
-  let b,over;
-  const play=()=>{
-    const pl=$('#pl',el);
-    if(!ab.model){pl.innerHTML='<p class="mute">먼저 학습을 시켜요.</p>';return;}
-    b=Array(9).fill(0);over=false;draw('내가 먼저 두세요');
-  };
+  const mark=v=>v===me?'●':'○';
   const draw=(msg)=>{
     const pl=$('#pl',el);
-    pl.innerHTML='<div class="ttt">'+b.map((v,i)=>'<i class="'+(v===1?'x':v===2?'o':'')+'" data-i="'+i+'" role="button" tabindex="0" aria-label="칸 '+(i+1)+'">'+(v===1?'●':v===2?'○':'')+'</i>').join('')+'</div><p class="mute" style="margin:10px 0">'+msg+'</p><button class="btn ghost sm" id="again">다시 하기</button>';
-    $('#again',pl).onclick=play;
-    if(!over)DD.$$('.ttt i',pl).forEach(c=>{const f=()=>move(+c.dataset.i);c.onclick=f;c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f();}};});
+    pl.innerHTML='<div class="ttt">'+b.map((v,i)=>'<i class="'+(v===me?'x':v?'o':'')+'" data-i="'+i+'" role="button" tabindex="0" aria-label="칸 '+(i+1)+'">'+(v?mark(v):'')+'</i>').join('')+'</div><p class="mute" style="margin:10px 0" role="status">'+msg+'</p>'
+     +(over?'<button class="btn" id="again">다음 판</button>':'');
+    if(over)$('#again',pl).onclick=start;
+    else DD.$$('.ttt i',pl).forEach(c=>{const f=()=>move(+c.dataset.i);c.onclick=f;c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f();}};});
+  };
+  const finish=(w)=>{
+    over=true;
+    ab.model=ML.tttLearn(ab.model||ML.tttEmpty(),hist,w);
+    const r=ML.tttEval(ab.model,100);
+    ab.info='무작위 상대 승률 '+pct(r.win/r.tot)+'%';DD.save();tabMarks();stat();
+    draw((w===0?'비겼어요':w===me?'내가 이겼어요!':'AI가 이겼어요')+' · AI가 이 판에서 배웠어요');
+  };
+  const aiMove=()=>{
+    draw('AI가 생각 중이에요…');
+    setTimeout(()=>{
+      const eps=Math.max(0.05,0.35-(ab.model?ab.model.games:0)/400);
+      const i=ML.tttMove(ab.model,b,ai,eps);b[i]=ai;hist[ai].push(ML.tttKey(b,ai));
+      const w=ML.winner(b);
+      if(w){finish(w);return;}
+      if(b.every(x=>x)){finish(0);return;}
+      draw('내 차례예요');
+    },350);
   };
   const move=i=>{
-    if(over||b[i])return;b[i]=1;let w=ML.winner(b);
-    if(w){over=true;draw('내가 이겼어요!');return;}
-    if(b.every(x=>x)){over=true;draw('비겼어요');return;}
-    // AI 수
-    const V=ab.model.V;let best=-9,cand=[];
-    for(let k=0;k<9;k++){if(b[k])continue;b[k]=2;const key=b.map(v=>v===0?'.':(v===2?'m':'o')).join('');const val=ML.winner(b)===2?2:(V[key]||0);b[k]=0;if(val>best+1e-9){best=val;cand=[k];}else if(Math.abs(val-best)<=1e-9)cand.push(k);}
-    b[cand[Math.floor(Math.random()*cand.length)]]=2;w=ML.winner(b);
-    if(w){over=true;draw('AI가 이겼어요');return;}
-    if(b.every(x=>x)){over=true;draw('비겼어요');return;}
-    draw('내 차례예요');
+    if(over||b[i])return;
+    b[i]=me;hist[me].push(ML.tttKey(b,me));
+    const w=ML.winner(b);
+    if(w){finish(w);return;}
+    if(b.every(x=>x)){finish(0);return;}
+    aiMove();
   };
-  play();
+  $('#rs',el).onclick=()=>{ab.model=null;ab.info='';ab.score=null;DD.save();start();};
+  start();
 }
 
 /* ----- 숫자 패턴 ----- */
