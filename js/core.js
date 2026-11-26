@@ -358,11 +358,11 @@ function shell(){
   body.insertBefore(head,body.firstChild);
   const ban=document.createElement('section');ban.className='banner'+(page==='index'?' home':'');
   ban.innerHTML=page==='index'
-   ?'<div class="banner-in"><img class="banner-duck" src="assets/duck-line.png" alt=""><h1>DUMBDUCK</h1><p class="tag1">AI를 학습시키고,<br>다른 사람들의 AI와 경쟁하세요</p><a class="go" href="learn.html">AI 학습시키기</a></div>'
+   ?'<div class="banner-in"><h1>DUMBDUCK</h1><p class="tag1">AI를 학습시키고,<br>다른 사람들의 AI와 경쟁하세요</p><div class="duckbox"><img src="assets/duck-line.png" alt=""></div></div>'
    :'<div class="banner-in"><img class="banner-duck" src="assets/duck-line.png" alt=""><h1>'+DD.esc(title)+'</h1></div>';
   head.after(ban);
-  const foot=document.createElement('footer');foot.className='foot';
-  foot.innerHTML='<p>© 2026 Frenchfries777 CC BY-NC-ND 4.0 · Created by Frenchfries777</p>';
+  const foot=document.createElement('footer');foot.className='foot'+(page==='index'?' band':'');
+  foot.innerHTML=(page==='index'?'<img src="assets/duck-line.png" alt="">':'')+'<p>© 2026 Frenchfries777 CC BY-NC-ND 4.0 · Created by Frenchfries777</p>';
   body.appendChild(foot);
 }
 document.addEventListener('DOMContentLoaded',shell);
