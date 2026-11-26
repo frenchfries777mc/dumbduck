@@ -1,4 +1,4 @@
-(function(){
+DD.ready(function(){
 const $=DD.$,esc=DD.esc,app=document.getElementById('app');
 const q=new URLSearchParams(location.search);
 let cur=DD.ai(q.get('ai'))||DD.rep()||DD.state.ais[0]||null;
@@ -18,4 +18,4 @@ function render(res){
   DD.$$('[data-t]').forEach(b=>b.onclick=()=>{const key=b.dataset.t;const r=DD.testAI(cur,key);render({key,r});});
 }
 render();
-})();
+});

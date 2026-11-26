@@ -1,10 +1,65 @@
 /* DumbDuck 공통: 화면 틀, 내 AI 저장, 시험, 기본 AI */
 (function(){
 const DD=window.DD={};
-const KEY='dd.v1';
-const mem={ais:[],rep:null,battles:[]};
-DD.state=(function(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.ais))return s;}catch(e){}return mem;})();
-DD.save=function(){try{localStorage.setItem(KEY,JSON.stringify(DD.state));return true;}catch(e){DD.toast('저장 공간이 부족해요. 쓰지 않는 AI를 지워 주세요.');return false;}};
+/* ---- 저장: AI는 Cloudflare(ff-store)에 보관하고, 브라우저에는 가벼운 목록만 둬요 ---- */
+const API=window.DD_STORE||'https://ff-store.frenchfries777mc.workers.dev';
+const META='dd.v2',OLD='dd.v1',OWNER='dd.owner',CACHE='dd.ai.';
+const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true;}catch(e){return false;}};
+const lsDel=k=>{try{localStorage.removeItem(k);}catch(e){}};
+let owner=lsGet(OWNER);
+if(!/^[0-9a-f]{32}$/.test(owner||'')){owner=Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join('');lsSet(OWNER,owner);}
+const url=k=>API+'/k/'+owner+'/'+k;
+const ser=o=>JSON.stringify(o,(k,v)=>(k[0]==='_'?undefined:v));
+DD.state={ais:[],rep:null,battles:[]};
+const synced={},pendingDel=[];
+function strip(ai){const c=JSON.parse(ser(ai));for(const k in c.ab){delete c.ab[k].model;delete c.ab[k].data;c.ab[k].has=1;}return c;}
+async function getAI(id){
+  const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),8000);
+  try{const r=await fetch(url('ai-'+id),{signal:ctl.signal});if(!r.ok)return null;return JSON.parse(await r.text());}
+  catch(e){return null;}finally{clearTimeout(t);}
+}
+DD.ready=fn=>DD._p.then(fn);
+DD._p=(async()=>{
+  let meta=null,old=null;
+  try{meta=JSON.parse(lsGet(META));}catch(e){}
+  if(!meta||!Array.isArray(meta.ais)){meta=null;try{old=JSON.parse(lsGet(OLD));}catch(e){}}
+  if(meta){
+    DD.state={ais:meta.ais,rep:meta.rep||null,battles:meta.battles||[]};
+    await Promise.all(DD.state.ais.map(async(ai,i)=>{
+      let loc=null;try{loc=JSON.parse(lsGet(CACHE+ai.id));}catch(e){}
+      if(loc){DD.state.ais[i]=loc;return;}            // 아직 서버에 못 올린 최신본이 있으면 그것부터
+      const full=await getAI(ai.id);
+      if(full){DD.state.ais[i]=full;synced[ai.id]=ser(full);}else ai._offline=true;
+    }));
+  }else if(old&&Array.isArray(old.ais)){                 // 예전 버전(브라우저 저장)에서 옮기기
+    DD.state={ais:old.ais,rep:old.rep||null,battles:old.battles||[]};
+    setTimeout(()=>{DD.save(true);lsDel(OLD);},0);
+  }
+  DD.offline=DD.state.ais.some(a=>a._offline);
+})();
+let timer=null,lastWarn=0,retry=null;
+function writeMeta(){lsSet(META,JSON.stringify({ais:DD.state.ais.map(strip),rep:DD.state.rep,battles:DD.state.battles}));}
+let flushing=false,again=false;
+async function flush(){
+  if(flushing){again=true;return;}
+  flushing=true;try{await flush1();}finally{flushing=false;if(again){again=false;flush();}}
+}
+async function flush1(){
+  let failed=false;
+  while(pendingDel.length){const id=pendingDel[0];try{const r=await fetch(url('ai-'+id),{method:'DELETE'});if(!r.ok)throw 0;pendingDel.shift();}catch(e){failed=true;break;}}
+  for(const ai of DD.state.ais){
+    if(ai._offline)continue;
+    const s=ser(ai);if(synced[ai.id]===s)continue;
+    try{const r=await fetch(url('ai-'+ai.id),{method:'PUT',headers:{'content-type':'text/plain'},body:s});if(!r.ok)throw 0;synced[ai.id]=s;lsDel(CACHE+ai.id);}
+    catch(e){failed=true;const f=ser(ai);if(f.length<400000)lsSet(CACHE+ai.id,f);}
+  }
+  if(failed){if(Date.now()-lastWarn>30000){lastWarn=Date.now();DD.toast('서버에 저장하지 못했어요. 잠시 뒤 다시 시도할게요.');}clearTimeout(retry);retry=setTimeout(flush,8000);}
+}
+DD.save=function(now){writeMeta();clearTimeout(timer);timer=setTimeout(flush,now?0:200);return true;};
+window.addEventListener('pagehide',()=>{ // 서버에 못 올린 채로 떠나면 이 브라우저에 최신본을 남겨요
+  for(const ai of DD.state.ais){if(ai._offline)continue;const s=ser(ai);if(synced[ai.id]!==s&&s.length<400000)lsSet(CACHE+ai.id,s);}
+});
 
 DD.ABILITIES=[
  {key:'char',name:'글자 맞히기',battle:true,desc:'문장의 다음 글자를 맞혀요'},
@@ -23,7 +78,7 @@ DD.newAI=function(name,profile){
   DD.state.ais.push(ai);if(!DD.state.rep)DD.state.rep=ai.id;DD.save();return ai;
 };
 DD.removeAI=function(id){
-  DD.state.ais=DD.state.ais.filter(a=>a.id!==id);
+  DD.state.ais=DD.state.ais.filter(a=>a.id!==id);pendingDel.push(id);delete synced[id];lsDel(CACHE+id);
   if(DD.state.rep===id)DD.state.rep=DD.state.ais[0]?DD.state.ais[0].id:null;DD.save();
 };
 DD.abCount=ai=>DD.ABILITIES.filter(a=>ai.ab[a.key]&&ai.ab[a.key].model).length;
@@ -97,20 +152,19 @@ DD.toast=function(msg){
   t.textContent=msg;t.className='show';clearTimeout(DD._tt);DD._tt=setTimeout(()=>t.className='',2600);
 };
 function shell(){
-  const body=document.body,page=body.dataset.page||'',title=body.dataset.title||'',sub=body.dataset.sub||'';
-  const rep=DD.rep();
+  const body=document.body,page=body.dataset.page||'',title=body.dataset.title||'';
   const head=document.createElement('header');head.className='top';
-  head.innerHTML='<div class="top-in"><a class="brand" href="index.html"><span class="logo"><img src="assets/duck-line-64.png" alt=""></span><span>DumbDuck</span></a>'
-   +'<nav class="menu" aria-label="주 메뉴">'+NAV.map(([h,t])=>'<a href="'+h+'"'+(h.startsWith(page+'.')?' class="on" aria-current="page"':'')+'>'+t+'</a>').join('')+'</nav>'
-   +'<a class="me'+(page==='mine'?' on':'')+'" href="mine.html" title="내 AI">'
-   +(rep?'<img src="'+DD.profileUrl(rep.profile)+'" alt=""><span>'+DD.esc(rep.name)+'</span>':'<span class="me-empty">내 AI</span>')+'</a></div>';
+  head.innerHTML='<nav class="menu" aria-label="주 메뉴">'+NAV.map(([h,t])=>'<a href="'+h+'"'+(h.startsWith(page+'.')?' class="on" aria-current="page"':'')+'>'+t+'</a>').join('')+'</nav>';
   body.insertBefore(head,body.firstChild);
-  const ban=document.createElement('section');ban.className='banner';
-  ban.innerHTML='<div class="banner-in"><div class="banner-text"><h1>'+DD.esc(title)+'</h1>'+(sub?'<p>'+DD.esc(sub)+'</p>':'')+'</div><img class="banner-duck" src="assets/duck-line.png" alt=""></div>';
+  const ban=document.createElement('section');ban.className='banner'+(page==='index'?' home':'');
+  ban.innerHTML=page==='index'
+   ?'<div class="banner-in"><img class="banner-duck" src="assets/duck-line.png" alt=""><h1>DUMBDUCK</h1><p class="tag1">AI를 학습시키고,<br>다른 사람들의 AI와 경쟁하세요</p><a class="go" href="learn.html">AI 학습시키기</a></div>'
+   :'<div class="banner-in"><img class="banner-duck" src="assets/duck-line.png" alt=""><h1>'+DD.esc(title)+'</h1></div>';
   head.after(ban);
   const foot=document.createElement('footer');foot.className='foot';
   foot.innerHTML='<p>© 2026 Frenchfries777 CC BY-NC-ND 4.0 · Created by Frenchfries777</p>';
   body.appendChild(foot);
 }
 document.addEventListener('DOMContentLoaded',shell);
+DD.ready(()=>setTimeout(()=>{if(DD.offline){const m=document.querySelector('main');if(m)m.insertAdjacentHTML('afterbegin','<p class="warn">서버에 연결하지 못해서 일부 AI를 불러오지 못했어요. 새로 고침해 보세요.</p>');}},0));
 })();
