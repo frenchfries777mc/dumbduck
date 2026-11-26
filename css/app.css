@@ -108,3 +108,17 @@ details.faq p{margin:0 0 14px;color:var(--mute)}
 .listrow{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .listrow:last-child{border-bottom:0}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+/* 내 계정 */
+input[type=password]{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;font:inherit;background:var(--card);color:var(--ink)}
+.msg{min-height:1.4em;margin:10px 0 0;font-size:15px;color:var(--mute)}
+.msg.err{color:var(--bad);font-weight:700}
+.acct{display:flex;flex-direction:column;gap:14px}
+.arow{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 22px}
+.arow h3{margin:0 0 4px;font-size:22px}
+.arow p{margin:4px 0 10px}
+.card.note{margin-bottom:16px;border-color:var(--blue)}
+.who{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chip{padding:8px 14px;border-radius:999px;border:2px solid var(--blue);background:transparent;color:var(--blue);font:inherit;font-weight:700;cursor:pointer}
+.chip.on{background:var(--blue);color:#fff}
+.or{display:flex;align-items:center;gap:12px;margin:18px 0 14px;color:var(--mute);font-size:14px}
+.or:before,.or:after{content:"";flex:1;height:1px;background:var(--line)}
