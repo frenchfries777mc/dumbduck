@@ -4,7 +4,7 @@ function inMatch(){try{return Date.now()-(+sessionStorage.getItem('dd.inmatch')|
 
 function list(){
   const ais=DD.state.ais;
-  let h='<div class="row" style="margin-bottom:18px"><h2 style="margin:0">내 AI '+ais.length+'개</h2><span class="sp"></span><a class="btn" href="learn.html?new=1">+ 새 AI</a></div>';
+  let h='<div class="row" style="margin-bottom:18px"><h2 style="margin:0">내 AI '+ais.length+'개</h2><span class="sp"></span><a class="btn" href="learn.html?new=1">+ AI 만들기</a></div>';
   if(!ais.length){app.innerHTML=h+'<div class="empty"><p>아직 AI가 없어요.</p><a class="btn" href="learn.html">AI 만들러 가기</a></div>';return;}
   h+='<div class="flat">'+ais.map(a=>{
     const isRep=DD.state.rep===a.id,n=DD.abCount(a);

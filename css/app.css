@@ -198,3 +198,4 @@ input[type=text],input[type=password],textarea,select{border-radius:0}
 .pick{border-radius:0}
 details.faq{border-radius:0}
 @media(prefers-color-scheme:dark){.card{background:#16213A}.tab{background:#1B2C52;color:#cfe0ff}.flat,.frow,.flat .listrow,.fres{border-color:#24344F}.fres{background:#1B2C52}}
+.tab.plus{margin-left:auto;background:#fff;border:2px solid #1A56DB;color:#1A56DB}
