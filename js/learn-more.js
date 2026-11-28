@@ -10,16 +10,14 @@ function pct(x){return Math.round(x*100);}
 function bars(list,max){return list.slice(0,max||5).map(([l,p])=>'<div class="prob"><b>'+esc(l===' '?'␣':l)+'</b><div class="bar"><i style="width:'+pct(p)+'%"></i></div><span>'+pct(p)+'%</span></div>').join('');}
 
 function render(){
-  if(!DD.state.ais.length||creating){app.innerHTML=createForm();bindCreate();return;}
+  if(creating){app.innerHTML=createForm();bindCreate();return;}
+  if(!DD.state.ais.length)cur=DD.newAI('Duck-01',1+Math.floor(Math.random()*12));   // AI가 없으면 따로 묻지 않고 하나 만들어 둬요
   if(!cur||!DD.ai(cur.id))cur=DD.rep()||DD.state.ais[0];
   const opts=DD.state.ais.map(a=>'<option value="'+a.id+'"'+(a.id===cur.id?' selected':'')+'>'+esc(a.name)+'</option>').join('');
-  app.innerHTML='<div class="row" style="margin-bottom:18px"><img class="ava" src="'+DD.profileUrl(cur.profile)+'" alt="">'
-   +'<div style="min-width:200px"><label class="f" for="sel">학습시킬 AI</label><select id="sel">'+opts+'</select></div>'
-   +'<button class="btn ghost sm" id="newai" style="align-self:end">+ 새 AI</button></div>'
-   +'<div class="tabs" role="tablist">'+DD.ABILITIES.map(a=>'<button class="tab'+(a.key===tab?' on':'')+'" role="tab" aria-selected="'+(a.key===tab)+'" data-k="'+a.key+'">'+a.name+(cur.ab[a.key]&&cur.ab[a.key].model?'<span class="ok">✓</span>':'')+'</button>').join('')+'</div>'
+  app.innerHTML='<div class="tabs ltabs" role="tablist">'+DD.ABILITIES.map(a=>'<button class="tab'+(a.key===tab?' on':'')+'" role="tab" aria-selected="'+(a.key===tab)+'" data-k="'+a.key+'">'+a.name+(cur.ab[a.key]&&cur.ab[a.key].model?'<span class="ok">✓</span>':'')+'</button>').join('')+'</div>'
+   +(DD.state.ais.length>1?'<div class="row" style="margin-bottom:18px"><img class="ava" src="'+DD.profileUrl(cur.profile)+'" alt=""><select id="sel" aria-label="학습시킬 AI" style="max-width:260px">'+opts+'</select></div>':'')
    +'<div id="panel"></div>';
-  $('#sel').onchange=e=>{cur=DD.ai(e.target.value);render();};
-  $('#newai').onclick=()=>{creating=true;render();};
+  const sl=$('#sel');if(sl)sl.onchange=e=>{cur=DD.ai(e.target.value);render();};
   DD.$$('.tab').forEach(b=>b.onclick=()=>{if(busy)return;if(b.dataset.k==='sent'){location.href='learn.html';return;}tab=b.dataset.k;render();});
   panel();
 }
