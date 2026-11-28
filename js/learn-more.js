@@ -5,6 +5,7 @@ let cur=null,tab='char',creating=false,busy=false;
 const q=new URLSearchParams(location.search);
 if(q.get('ability')&&DD.ability(q.get('ability')))tab=q.get('ability');
 cur=DD.ai(q.get('ai'))||DD.rep()||DD.state.ais[0]||null;
+if(q.get('new'))creating=true;
 
 function pct(x){return Math.round(x*100);}
 function bars(list,max){return list.slice(0,max||5).map(([l,p])=>'<div class="prob"><b>'+esc(l===' '?'␣':l)+'</b><div class="bar"><i style="width:'+pct(p)+'%"></i></div><span>'+pct(p)+'%</span></div>').join('');}
@@ -14,7 +15,7 @@ function render(){
   if(!DD.state.ais.length)cur=DD.newAI('Duck-01',1+Math.floor(Math.random()*12));   // AI가 없으면 따로 묻지 않고 하나 만들어 둬요
   if(!cur||!DD.ai(cur.id))cur=DD.rep()||DD.state.ais[0];
   const opts=DD.state.ais.map(a=>'<option value="'+a.id+'"'+(a.id===cur.id?' selected':'')+'>'+esc(a.name)+'</option>').join('');
-  app.innerHTML='<div class="tabs ltabs" role="tablist">'+DD.ABILITIES.map(a=>'<button class="tab'+(a.key===tab?' on':'')+'" role="tab" aria-selected="'+(a.key===tab)+'" data-k="'+a.key+'">'+a.name+(cur.ab[a.key]&&cur.ab[a.key].model?'<span class="ok">✓</span>':'')+'</button>').join('')+'</div>'
+  app.innerHTML='<div class="tabs ltabs" role="tablist">'+DD.ABILITIES.map(a=>'<button class="tab'+(a.key===tab?' on':'')+'" role="tab" aria-selected="'+(a.key===tab)+'" data-k="'+a.key+'">'+a.name+(cur.ab[a.key]&&cur.ab[a.key].model?'<span class="ok">✓</span>':'')+'</button>').join('')+'<a class="tab plus" href="learn.html?new=1">+ AI 만들기</a></div>'
    +(DD.state.ais.length>1?'<div class="row" style="margin-bottom:18px"><img class="ava" src="'+DD.profileUrl(cur.profile)+'" alt=""><select id="sel" aria-label="학습시킬 AI" style="max-width:260px">'+opts+'</select></div>':'')
    +'<div id="panel"></div>';
   const sl=$('#sel');if(sl)sl.onchange=e=>{cur=DD.ai(e.target.value);render();};
@@ -28,7 +29,7 @@ function createForm(){
    +'<p class="mute" style="margin:14px 0 0">프로필 그림은 나중에 <a href="mine.html">내 AI</a>에서 고를 수 있어요.</p></div>';
 }
 function bindCreate(){
-  $('#mk').onclick=()=>{const ai=DD.newAI($('#nm').value,1+Math.floor(Math.random()*12));cur=ai;creating=false;render();};
+  $('#mk').onclick=()=>{const ai=DD.newAI($('#nm').value,1+Math.floor(Math.random()*12));location.href='learn.html?ai='+ai.id;};
   $('#nm').addEventListener('keydown',e=>{if(e.key==='Enter')$('#mk').click();});
   const c=$('#cx');if(c)c.onclick=()=>{creating=false;render();};
 }

@@ -2,8 +2,8 @@ DD.ready(function(){
 const $=DD.$,esc=DD.esc,app=document.getElementById('app');
 const q=new URLSearchParams(location.search);
 const ab0=q.get('ability');
-if(ab0&&ab0!=='sent'&&DD.ability(ab0)){const s=document.createElement('script');s.src='js/learn-more.js';document.body.appendChild(s);return;}
-let cur=q.get('new')?null:(DD.ai(q.get('ai'))||DD.rep()||DD.state.ais[0]||null);
+if(q.get('new')||(ab0&&ab0!=='sent'&&DD.ability(ab0))){const s=document.createElement('script');s.src='js/learn-more.js';document.body.appendChild(s);return;}
+let cur=DD.ai(q.get('ai'))||DD.rep()||DD.state.ais[0]||null;
 let texts=[''];
 (function(){const ab=cur&&cur.ab.sent;if(ab&&ab.data){
   const d=ab.data,list=Array.isArray(d.classes)?d.classes:Object.keys(d).map(k=>d[k]);
@@ -12,7 +12,7 @@ let acc=null;
 if(cur&&cur.ab.sent&&cur.ab.sent.acc!=null)acc=cur.ab.sent.acc;
 function draw(note){
   const cls=texts.map((t,i)=>'<div class="cls"><div class="graybar'+(i?'':' first')+'">분류 '+(i+1)+'</div><textarea data-i="'+i+'" aria-label="분류 '+(i+1)+' 예시">'+esc(t)+'</textarea></div>').join('');
-  app.innerHTML='<div class="tabs ltabs" role="navigation" aria-label="배울 능력">'+DD.ABILITIES.map(a=>'<a class="tab'+(a.key==='sent'?' on':'')+'" href="learn.html'+(a.key==='sent'?'':'?ability='+a.key)+'"'+(a.key==='sent'?' aria-current="page"':'')+'>'+a.name+'</a>').join('')+'</div>'
+  app.innerHTML='<div class="tabs ltabs" role="navigation" aria-label="배울 능력">'+DD.ABILITIES.map(a=>'<a class="tab'+(a.key==='sent'?' on':'')+'" href="learn.html'+(a.key==='sent'?'':'?ability='+a.key)+'"'+(a.key==='sent'?' aria-current="page"':'')+'>'+a.name+'</a>').join('')+'<a class="tab plus" href="learn.html?new=1">+ AI 만들기</a></div>'
    +'<div class="lgrid"><div>'
    +'<div class="bluebar" role="heading" aria-level="2">학습 자료</div>'+cls
    +'<button class="graybar" id="add">+ 분류 추가</button>'
