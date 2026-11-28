@@ -256,8 +256,8 @@ DD.auth={
 };
 
 DD.ABILITIES=[
- {key:'char',name:'글자 맞히기',battle:true,desc:'문장의 다음 글자를 맞혀요'},
  {key:'sent',name:'문장 분류',battle:true,desc:'문장이 긍정인지 부정인지 가려내요'},
+ {key:'char',name:'글자 맞히기',battle:true,desc:'문장의 다음 글자를 맞혀요'},
  {key:'ttt',name:'틱택토',battle:true,desc:'나와 한 판씩 두며 이기는 법을 익혀요'},
  {key:'num',name:'숫자 패턴',battle:false,desc:'숫자 줄의 다음 숫자를 맞혀요'}
 ];
@@ -346,7 +346,7 @@ DD.board=function(key){
 };
 
 /* ---------- 화면 틀 ---------- */
-const NAV=[['learn.html','AI 학습'],['test.html','AI 테스트'],['rank.html','순위표'],['battle.html','AI 대전'],['account.html','내 계정']];
+const NAV=[['index.html','홈'],['learn.html','AI 학습'],['test.html','AI 테스트'],['rank.html','순위표'],['battle.html','AI 대전'],['account.html','내 계정']];
 DD.toast=function(msg){
   let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.setAttribute('role','status');document.body.appendChild(t);}
   t.textContent=msg;t.className='show';clearTimeout(DD._tt);DD._tt=setTimeout(()=>t.className='',2600);

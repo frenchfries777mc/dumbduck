@@ -3,7 +3,7 @@ const $=DD.$,esc=DD.esc,app=document.getElementById('app');
 const q=new URLSearchParams(location.search);
 const ab0=q.get('ability');
 if(ab0&&ab0!=='sent'&&DD.ability(ab0)){const s=document.createElement('script');s.src='js/learn-more.js';document.body.appendChild(s);return;}
-let cur=DD.ai(q.get('ai'))||DD.rep()||DD.state.ais[0]||null;
+let cur=q.get('new')?null:(DD.ai(q.get('ai'))||DD.rep()||DD.state.ais[0]||null);
 let texts=[''];
 (function(){const ab=cur&&cur.ab.sent;if(ab&&ab.data){
   const d=ab.data,list=Array.isArray(d.classes)?d.classes:Object.keys(d).map(k=>d[k]);
