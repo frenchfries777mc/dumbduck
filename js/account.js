@@ -8,12 +8,12 @@ function inMatch(){try{return Date.now()-(+sessionStorage.getItem('dd.inmatch')|
 /* ---------- 로그인 전 ---------- */
 let mode='dd';   // dd: DumbDuck 계정, ff: frenchfries777.com 계정
 function outView(tab){
-  const pend=A.anonList().length,ff=(mode==='ff'&&tab==='in');
+  const pend=A.anonList().length,ff=(mode==='ff'),login=(tab==='in'||ff);
   app.innerHTML='<div class="outwrap"><div class="tabs"><button class="tab'+(tab==='in'?' on':'')+'" data-t="in" aria-pressed="'+(tab==='in')+'">로그인</button>'
    +'<button class="tab'+(tab==='up'?' on':'')+'" data-t="up" aria-pressed="'+(tab==='up')+'">가입하기</button></div>'
    +'<div class="card">'
-   +(ff?'<h3 style="margin:0 0 14px">frenchfries777.com 계정으로 로그인</h3>':'')
-   +(tab==='in'
+   +(ff?'<h3 style="margin:0 0 14px">frenchfries777.com 계정으로 '+(tab==='in'?'로그인':'가입')+'</h3><p class="mute" style="margin:-6px 0 14px">frenchfries777.com 아이디와 비밀번호를 넣으면 DumbDuck 계정이 만들어져요.</p>':'')
+   +(login
      ?'<label class="f" for="uid">아이디</label><input type="text" id="uid" autocomplete="username" autocapitalize="none" maxlength="16">'
       +'<label class="f" for="pw" style="margin-top:14px">비밀번호</label><input type="password" id="pw" autocomplete="current-password">'
      :'<label class="f" for="uid">아이디 (영문 소문자·숫자·_ 3~16자)</label><input type="text" id="uid" autocomplete="username" autocapitalize="none" maxlength="16">'
@@ -23,18 +23,18 @@ function outView(tab){
    +'<div class="row" style="margin-top:6px"><button class="btn" id="go">'+(tab==='in'?'로그인':'가입하기')+'</button>'+(ff?'<button class="btn ghost" id="back">← DumbDuck 계정으로</button>':'')+'</div>'
    +'<div class="or"><span>또는</span></div>'
    +'<div class="row"><button class="btn ghost" id="goog">Google로 '+(tab==='in'?'로그인':'가입하기')+'</button>'
-   +(tab==='in'&&!ff?'<button class="btn ghost" id="ffb">frenchfries777.com 계정</button>':'')+'</div></div>'
+   +(!ff?'<button class="btn ghost" id="ffb">frenchfries777.com 계정'+(tab==='in'?'':'으로 가입')+'</button>':'')+'</div></div>'
    +'<p class="mute" style="margin-top:14px">이메일은 필요 없어요. 가입하면 내 AI가 내 계정에 저장되고, 다른 기기에서도 불러올 수 있어요.'
    +(pend?' 이 브라우저에서 만든 AI '+pend+'개는 가입한 뒤 내 계정으로 가져올 수 있어요.':'')+'</p></div>';
   DD.$$('.tab').forEach(b=>b.onclick=()=>outView(b.dataset.t));
-  const fb=$('#ffb');if(fb)fb.onclick=()=>{mode='ff';outView('in');};
-  const bk=$('#back');if(bk)bk.onclick=()=>{mode='dd';outView('in');};
+  const fb=$('#ffb');if(fb)fb.onclick=()=>{mode='ff';outView(tab);};
+  const bk=$('#back');if(bk)bk.onclick=()=>{mode='dd';outView(tab);};
   $('#goog').onclick=async()=>{$('#goog').disabled=true;say('구글 화면으로 가요…');const r=await A.oauth('google');if(r.error){say(r.error,true);$('#goog').disabled=false;}};
   const go=$('#go');
   const run=async()=>{
     if(!A.ok()){say('지금은 계정을 쓸 수 없어요.',true);return;}
     go.disabled=true;say('잠시만요…');
-    const r=tab==='in'?await (ff?A.signInFF:A.signIn)($('#uid').value,$('#pw').value):await A.signUp($('#uid').value,$('#pw').value,$('#nick').value);
+    const r=ff?await A.signInFF($('#uid').value,$('#pw').value):tab==='in'?await A.signIn($('#uid').value,$('#pw').value):await A.signUp($('#uid').value,$('#pw').value,$('#nick').value);
     if(r.error){say(r.error,true);go.disabled=false;return;}
     location.href='account.html';
   };
