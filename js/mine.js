@@ -4,16 +4,13 @@ function inMatch(){try{return Date.now()-(+sessionStorage.getItem('dd.inmatch')|
 
 function list(){
   const ais=DD.state.ais;
-  let h='<div class="row" style="margin-bottom:18px"><h2 style="margin:0">내 AI '+ais.length+'개</h2><span class="sp"></span><a class="btn" href="learn.html">+ 새 AI 학습</a></div>';
-  if(!ais.length){app.innerHTML=h+'<div class="card empty"><p>아직 AI가 없어요. 첫 AI를 만들어 보세요.</p><a class="btn" href="learn.html">AI 만들러 가기</a></div>';return;}
-  h+='<div class="card">'+ais.map(a=>{
+  let h='<div class="row" style="margin-bottom:18px"><h2 style="margin:0">내 AI '+ais.length+'개</h2><span class="sp"></span><a class="btn" href="learn.html">+ 새 AI</a></div>';
+  if(!ais.length){app.innerHTML=h+'<div class="empty"><p>아직 AI가 없어요.</p><a class="btn" href="learn.html">AI 만들러 가기</a></div>';return;}
+  h+='<div class="flat">'+ais.map(a=>{
     const isRep=DD.state.rep===a.id,n=DD.abCount(a);
     return '<div class="listrow"><a href="#'+a.id+'" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;flex:1;min-width:220px"><img class="ava" src="'+DD.profileUrl(a.profile)+'" alt="">'
-     +'<span><b style="font-size:18px">'+(isRep?'★ ':'')+esc(a.name)+'</b><br><span class="mute">능력 '+n+'/'+DD.ABILITIES.length+' · 점수 '+DD.fmt(DD.totalScore(a))+'</span></span></a>'
-     +(isRep?'<span class="tag">대표 AI</span>':'<button class="btn ghost sm" data-rep="'+a.id+'"'+(inMatch()?' disabled title="대전 중에는 바꿀 수 없어요"':'')+'>대표 지정</button>')
-     +'<a class="btn ghost sm" href="#'+a.id+'">자세히</a></div>';}).join('')+'</div>';
+     +'<span><b style="font-size:18px">'+(isRep?'★ ':'')+esc(a.name)+'</b><br><span class="mute">점수 '+DD.fmt(DD.totalScore(a))+'</span></span></a></div>';}).join('')+'</div>';
   app.innerHTML=h;
-  DD.$$('[data-rep]').forEach(b=>b.onclick=()=>{if(inMatch())return;DD.state.rep=b.dataset.rep;DD.save();DD.toast('대표 AI를 바꿨어요');location.reload();});
 }
 
 function detail(id){

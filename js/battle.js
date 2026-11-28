@@ -31,21 +31,21 @@ function coin(text){return {w:Math.random()<.5?'a':'b',text};}
 
 function recentInner(){
   const b=DD.state.battles||[];
-  return (b.length?'<div class="card">'+b.slice(-8).reverse().map(x=>'<div class="listrow"><span class="tag" style="background:'+(x.win?'var(--ok)':'var(--bad)')+'">'+(x.win?'승':'패')+'</span><span>'+esc(x.me)+' vs '+esc(x.opp)+'</span><span class="sp"></span><b>'+x.a+' : '+x.b+'</b></div>').join('')+'</div>':'<div class="card empty">아직 대전 기록이 없어요.</div>');
+  return (b.length?'<div class="card">'+b.slice(-5).reverse().map(x=>'<div class="listrow"><span class="tag" style="background:'+(x.win?'var(--ok)':'var(--bad)')+'">'+(x.win?'승':'패')+'</span><span>'+esc(x.me)+' vs '+esc(x.opp)+'</span><span class="sp"></span><b>'+x.a+' : '+x.b+'</b></div>').join('')+'</div>':'<p class="mute">아직 대전 기록이 없어요.</p>');
 }
-function recent(){return '<h2 style="margin-top:32px">최근 대전</h2><div id="hist">'+recentInner()+'</div>';}
+function recent(){return '<h3 style="margin-top:30px">최근 대전</h3><div id="hist">'+recentInner()+'</div>';}
 
 function view(extra){
   const me=DD.rep();
   if(!me){app.innerHTML='<div class="card empty"><p>대전에 나갈 대표 AI가 없어요.</p><a class="btn" href="learn.html">AI 만들러 가기</a></div>'+recent();return;}
   const miss=DD.missing(me),ok=!miss.length;
-  app.innerHTML='<div class="card"><div class="vs">'
-   +'<div class="fighter"><img src="'+DD.profileUrl(me.profile)+'" alt=""><h3>★ '+esc(me.name)+'</h3><span class="mute">능력 '+DD.abCount(me)+'/'+DD.ABILITIES.length+' · 점수 '+DD.fmt(DD.totalScore(me))+'</span></div>'
-   +'<div><div class="score" id="sc" aria-live="polite">0 : 0</div><p class="mute" style="text-align:center;margin:0">3판 2선승</p></div>'
-   +'<div class="fighter"><img src="'+DD.profileUrl(opp.profile)+'" alt=""><h3>'+esc(opp.name)+'</h3><span class="mute">기본 AI</span></div></div>'
+  app.innerHTML='<div class="vs">'
+   +'<div class="fighter"><img src="'+DD.profileUrl(me.profile)+'" alt=""><h3>'+esc(me.name)+'</h3></div>'
+   +'<div class="score" id="sc" aria-live="polite">0 : 0</div>'
+   +'<div class="fighter"><img src="'+DD.profileUrl(opp.profile)+'" alt=""><h3>'+esc(opp.name)+'</h3></div></div>'
    +'<div class="row" style="justify-content:center;margin-top:20px"><button class="btn" id="go"'+(ok&&!running?'':' disabled')+'>대전 시작</button><button class="btn ghost" id="re"'+(running?' disabled':'')+'>다른 상대</button></div>'
-   +(ok?'':'<p class="warn" style="margin-top:16px">능력이 모자라면 버튼이 잠겨요: '+miss.map(m=>'<a href="learn.html?ai='+me.id+'&ability='+m.key+'">'+m.name+' → 학습하기</a>').join(' · ')+'</p>')
-   +'<ul class="log" id="log"></ul></div>'+recent();
+   +(ok?'':'<p class="mute" style="margin-top:14px;text-align:center">먼저 배워야 해요: '+miss.map(m=>'<a href="learn.html?ai='+me.id+'&ability='+m.key+'">'+m.name+'</a>').join(' · ')+'</p>')
+   +'<ul class="log" id="log"></ul>'+recent();
   $('#re').onclick=()=>{const o=DD.BOTS.filter(b=>b.id!==opp.id);opp=o[Math.floor(Math.random()*o.length)];view();};
   $('#go').onclick=()=>start(me);
 }

@@ -24,8 +24,7 @@ function outView(tab){
    +'<div class="or"><span>또는</span></div>'
    +'<div class="row"><button class="btn ghost" id="goog">Google로 '+(tab==='in'?'로그인':'가입하기')+'</button>'
    +(!ff?'<button class="btn ghost" id="ffb">frenchfries777.com 계정'+(tab==='in'?'':'으로 가입')+'</button>':'')+'</div></div>'
-   +'<p class="mute" style="margin-top:14px">이메일은 필요 없어요. 가입하면 내 AI가 내 계정에 저장되고, 다른 기기에서도 불러올 수 있어요.'
-   +(pend?' 이 브라우저에서 만든 AI '+pend+'개는 가입한 뒤 내 계정으로 가져올 수 있어요.':'')+'</p></div>';
+   +(pend?'<p class="mute" style="margin-top:14px">이 브라우저에서 만든 AI '+pend+'개는 가입한 뒤 내 계정으로 가져올 수 있어요.</p>':'')+'</div>';
   DD.$$('.tab').forEach(b=>b.onclick=()=>outView(b.dataset.t));
   const fb=$('#ffb');if(fb)fb.onclick=()=>{mode='ff';outView(tab);};
   const bk=$('#back');if(bk)bk.onclick=()=>{mode='dd';outView(tab);};
