@@ -12,7 +12,7 @@ function bars(list,max){return list.slice(0,max||5).map(([l,p])=>'<div class="pr
 
 function render(){
   if(creating){app.innerHTML=createForm();bindCreate();return;}
-  if(!DD.state.ais.length)cur=DD.newAI('Duck-01',1+Math.floor(Math.random()*12));   // AI가 없으면 따로 묻지 않고 하나 만들어 둬요
+  if(!DD.state.ais.length){app.innerHTML=createForm();bindCreate();return;}   // AI가 없으면 먼저 이름과 프로필을 정해요
   if(!cur||!DD.ai(cur.id))cur=DD.rep()||DD.state.ais[0];
   const opts=DD.state.ais.map(a=>'<option value="'+a.id+'"'+(a.id===cur.id?' selected':'')+'>'+esc(a.name)+'</option>').join('');
   app.innerHTML='<div class="tabs ltabs" role="tablist">'+DD.ABILITIES.map(a=>'<button class="tab'+(a.key===tab?' on':'')+'" role="tab" aria-selected="'+(a.key===tab)+'" data-k="'+a.key+'">'+a.name+(cur.ab[a.key]&&cur.ab[a.key].model?'<span class="ok">✓</span>':'')+'</button>').join('')+'<a class="tab plus" href="learn.html?new=1">+ AI 만들기</a></div>'
@@ -22,16 +22,18 @@ function render(){
   DD.$$('.tab').forEach(b=>b.onclick=()=>{if(busy)return;if(b.dataset.k==='sent'){location.href='learn.html';return;}tab=b.dataset.k;render();});
   panel();
 }
+let pickProf=1+Math.floor(Math.random()*12);
 function createForm(){
-  return '<div class="card" style="max-width:520px"><h2>'+(DD.state.ais.length?'새 AI 만들기':'먼저 내 AI를 만들어요')+'</h2>'
-   +'<label class="f" for="nm">AI 이름 (12자까지)</label><input type="text" id="nm" maxlength="12" placeholder="예: BlueDuck">'
-   +'<div class="row" style="margin-top:16px"><button class="btn" id="mk">만들기</button>'+(DD.state.ais.length?'<button class="btn ghost" id="cx">취소</button>':'')+'</div>'
-   +'<p class="mute" style="margin:14px 0 0">프로필 그림은 나중에 <a href="mine.html">내 AI</a>에서 고를 수 있어요.</p></div>';
+  return '<div class="createbox"><div class="bluebar" role="heading" aria-level="2">'+(DD.state.ais.length?'새 AI 만들기':'먼저 내 AI를 만들어요')+'</div>'
+   +'<label class="f" for="nm" style="margin-top:18px">AI 이름 (12자까지)</label><input type="text" id="nm" maxlength="12" placeholder="예: BlueDuck" autocomplete="off">'
+   +'<label class="f" style="margin-top:18px">프로필 그림</label><div class="pickgrid" id="pg">'+Array.from({length:12},(_,i)=>'<button class="pick" data-p="'+(i+1)+'" aria-pressed="'+(pickProf===i+1)+'" aria-label="프로필 '+(i+1)+'"><img src="'+DD.profileUrl(i+1)+'" alt=""></button>').join('')+'</div>'
+   +'<div class="row" style="margin-top:20px"><button class="btn" id="mk">만들기</button>'+(DD.state.ais.length?'<a class="btn ghost" href="learn.html">취소</a>':'')+'</div></div>';
 }
 function bindCreate(){
-  $('#mk').onclick=()=>{const ai=DD.newAI($('#nm').value,1+Math.floor(Math.random()*12));location.href='learn.html?ai='+ai.id;};
+  DD.$$('#pg .pick').forEach(b=>b.onclick=()=>{pickProf=+b.dataset.p;DD.$$('#pg .pick').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));});
+  $('#mk').onclick=()=>{const nm=$('#nm').value.trim();if(!nm){DD.toast('AI 이름을 적어 주세요');$('#nm').focus();return;}const ai=DD.newAI(nm,pickProf);location.href='learn.html?ai='+ai.id;};
   $('#nm').addEventListener('keydown',e=>{if(e.key==='Enter')$('#mk').click();});
-  const c=$('#cx');if(c)c.onclick=()=>{creating=false;render();};
+  $('#nm').focus();
 }
 
 function ensure(key){return cur.ab[key]||(cur.ab[key]={});}

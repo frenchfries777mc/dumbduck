@@ -2,7 +2,7 @@ DD.ready(function(){
 const $=DD.$,esc=DD.esc,app=document.getElementById('app');
 const q=new URLSearchParams(location.search);
 const ab0=q.get('ability');
-if(q.get('new')||(ab0&&ab0!=='sent'&&DD.ability(ab0))){const s=document.createElement('script');s.src='js/learn-more.js';document.body.appendChild(s);return;}
+if(q.get('new')||!DD.state.ais.length||(ab0&&ab0!=='sent'&&DD.ability(ab0))){const s=document.createElement('script');s.src='js/learn-more.js';document.body.appendChild(s);return;}
 let cur=DD.ai(q.get('ai'))||DD.rep()||DD.state.ais[0]||null;
 let texts=[''];
 (function(){const ab=cur&&cur.ab.sent;if(ab&&ab.data){
@@ -36,7 +36,6 @@ function train(){
   const m2=ML.nbTrain(tr);let ok=0;
   test.forEach(([s,c])=>{const p=ML.nbPredict(m2,s);if(p.length&&p[0][0]===c)ok++;});
   acc=test.length?Math.round(ok/test.length*100):0;
-  if(!cur)cur=DD.newAI('Duck-'+String(DD.state.ais.length+1).padStart(2,'0'),1+Math.floor(Math.random()*12));
   const ab=cur.ab.sent||(cur.ab.sent={});
   ab.model=model;ab.data={classes:texts.slice()};ab.acc=acc;ab.info='분류 '+Object.keys(data).length+'개 배움 · 정확도 '+acc+'%';DD.save();
   draw('학습을 마쳤어요. ('+cur.name+')');
