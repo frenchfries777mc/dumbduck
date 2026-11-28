@@ -12,7 +12,8 @@ let acc=null;
 if(cur&&cur.ab.sent&&cur.ab.sent.acc!=null)acc=cur.ab.sent.acc;
 function draw(note){
   const cls=texts.map((t,i)=>'<div class="cls"><div class="graybar'+(i?'':' first')+'">분류 '+(i+1)+'</div><textarea data-i="'+i+'" aria-label="분류 '+(i+1)+' 예시">'+esc(t)+'</textarea></div>').join('');
-  app.innerHTML='<div class="lgrid"><div>'
+  app.innerHTML='<div class="tabs ltabs" role="navigation" aria-label="배울 능력">'+DD.ABILITIES.map(a=>'<a class="tab'+(a.key==='sent'?' on':'')+'" href="learn.html'+(a.key==='sent'?'':'?ability='+a.key)+'"'+(a.key==='sent'?' aria-current="page"':'')+'>'+a.name+'</a>').join('')+'</div>'
+   +'<div class="lgrid"><div>'
    +'<div class="bluebar" role="heading" aria-level="2">학습 자료</div>'+cls
    +'<button class="graybar" id="add">+ 분류 추가</button>'
    +'<div class="howto"><h3>학습은 이렇게 해요</h3><p>1. \'분류 1\' 칸에 같은 종류의 예시를 한 줄에 하나씩 넣어요.</p><p>2. \'+ 분류 추가\'로 분류를 늘리고, 각 분류에 예시를 넣어요.</p><p>3. \'학습 시작\'을 누르면 AI가 배우고, 정확도가 오른쪽에 나와요.</p></div>'

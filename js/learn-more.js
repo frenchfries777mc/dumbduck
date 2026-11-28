@@ -20,7 +20,7 @@ function render(){
    +'<div id="panel"></div>';
   $('#sel').onchange=e=>{cur=DD.ai(e.target.value);render();};
   $('#newai').onclick=()=>{creating=true;render();};
-  DD.$$('.tab').forEach(b=>b.onclick=()=>{if(busy)return;tab=b.dataset.k;render();});
+  DD.$$('.tab').forEach(b=>b.onclick=()=>{if(busy)return;if(b.dataset.k==='sent'){location.href='learn.html';return;}tab=b.dataset.k;render();});
   panel();
 }
 function createForm(){
